@@ -1,0 +1,37 @@
+version: '3.4'
+
+services:
+  cloud-clipboard:
+    image: vtichy/cloud-clipboard
+    container_name: clibpoard_share
+    environment:
+      - VERIFICATION_TOKEN=xxx
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.clipboard-service.loadbalancer.server.port=9876
+
+      - traefik.http.routers.clipboard-https.rule=Host(`$HOST`)
+      - traefik.http.routers.clipboard-https.entrypoints=secure
+      - traefik.http.routers.clipboard-https.tls=true
+      - traefik.http.routers.clipboard-https.tls.certresolver=le
+      - traefik.http.routers.clipboard-https.service=clipboard-service
+  traefik:
+    image: traefik:2.2
+    container_name: clibpoard_share_traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $PWD/acme.json:/acme.json
+    ports:
+      - "443:443"
+      - "9876:9876"
+    command:
+#      - --log.level=DEBUG
+#      - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.secure.address=:9876
+      - --entrypoints.websecure.address=:443
+      - --certificatesResolvers.le.acme.email=$EMAIL
+      - --certificatesResolvers.le.acme.storage=acme.json
+      - --certificatesResolvers.le.acme.tlsChallenge=true
+      - --certificatesResolvers.le.acme.httpChallenge=true
