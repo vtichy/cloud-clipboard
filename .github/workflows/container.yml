@@ -1,0 +1,44 @@
+name: Container
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          pull: true
+          load: true
+          tags: ghcr.io/vtichy/cloud-clipboard:${{ github.sha }}
+      - name: Verify runtime trust
+        run: python3 .github/scripts/verify-image-trust.py ghcr.io/vtichy/cloud-clipboard:${{ github.sha }} java
+      - uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push ghcr.io/vtichy/cloud-clipboard:${{ github.sha }}
+          docker tag ghcr.io/vtichy/cloud-clipboard:${{ github.sha }} ghcr.io/vtichy/cloud-clipboard:latest
+          docker push ghcr.io/vtichy/cloud-clipboard:latest
+      - name: Export deployment image
+        if: github.event_name != 'pull_request'
+        run: docker save ghcr.io/vtichy/cloud-clipboard:${{ github.sha }} | gzip > image.tar.gz
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: container-image
+          path: image.tar.gz
+          retention-days: 1
+          compression-level: 0
