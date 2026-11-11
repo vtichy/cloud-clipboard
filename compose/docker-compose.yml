@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   cloud-clipboard:
-    image: vtichy/cloud-clipboard
+    image: ghcr.io/vtichy/cloud-clipboard:latest
     container_name: clibpoard_share
     environment:
       - VERIFICATION_TOKEN=xxx
@@ -16,7 +16,7 @@ services:
       - traefik.http.routers.clipboard-https.tls.certresolver=le
       - traefik.http.routers.clipboard-https.service=clipboard-service
   traefik:
-    image: traefik:2.2
+    image: traefik:v3.7.16
     container_name: clibpoard_share_traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
