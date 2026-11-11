@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11.0.33_10-jdk-noble
+FROM eclipse-temurin:11-jdk-noble
 EXPOSE 9876:9876
 RUN mkdir /app
 COPY ./build/install/cloud-clipboard/ /app/

@@ -16,7 +16,7 @@ services:
       - traefik.http.routers.clipboard-https.tls.certresolver=le
       - traefik.http.routers.clipboard-https.service=clipboard-service
   traefik:
-    image: traefik:v3.7.16
+    image: traefik:v3
     container_name: clibpoard_share_traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
